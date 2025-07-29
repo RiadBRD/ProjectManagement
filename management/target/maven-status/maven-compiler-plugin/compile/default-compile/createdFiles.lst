@@ -1,0 +1,8 @@
+com\project\entity\Project.class
+com\project\repository\TaskRepository.class
+com\project\enums\TaskPriority.class
+com\project\enums\TaskStatus.class
+com\project\entity\Task.class
+com\project\enums\ProjectStatus.class
+com\project\Main.class
+com\project\repository\ProjectRepository.class
