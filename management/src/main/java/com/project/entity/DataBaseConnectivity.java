@@ -2,13 +2,13 @@ package com.project.entity;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
+import java.util.Properties;
 
 public class DataBaseConnectivity {
-    private static final String URL = "jdbc:mysql://localhost:3306/project?useSSL=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/gestion_projets";
     private static final String USER = "root";
     private static final String PASSWORD = "root";
 
@@ -18,14 +18,19 @@ public class DataBaseConnectivity {
 
     public void connect() throws SQLException {
         try {
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Properties props = new Properties();
+            props.put("user", USER);
+            props.put("password", PASSWORD);
+            props.put("useSSL", "false");
+            props.put("serverTimezone", "UTC");
+            this.connection = DriverManager.getConnection(URL, props);
             System.out.println("✅ Connexion réussie à MySQL !");
         } catch (SQLException e) {
             System.err.println("❌ Erreur de connexion : " + e.getMessage());
         }
     }
 
-      public void disconnect() throws SQLException{
+    public void disconnect() throws SQLException {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
@@ -36,25 +41,33 @@ public class DataBaseConnectivity {
         }
     }
 
-    // Exécuter une requête SELECT
-    public void executeQuery(String query) {
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+    public PreparedStatement preparedStatement(String sql) throws SQLException {
+        return connection.prepareStatement(sql);
+    }
 
-            while (rs.next()) {
-                // Exemple : affichage des colonnes génériques
-                System.out.println(rs.getInt(1) + " - " + rs.getString(2));
+    public int executeUpdate(String sql, Object... params) throws SQLException {
+        try (PreparedStatement stmt = preparedStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
             }
-
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur d'exécution de la requête : " + e.getMessage());
+            return stmt.executeUpdate();
         }
     }
 
-    public boolean isConnected() throws SQLException{
-        if(connection.isClosed()){
+    
+    public ResultSet executeQuery(String sql, Object... params) throws SQLException {
+        PreparedStatement stmt = preparedStatement(sql);
+        for (int i = 0; i < params.length; i++) {
+            stmt.setObject(i + 1, params[i]);
+        }
+        return stmt.executeQuery();
+    }
+
+    public boolean isConnected() throws SQLException {
+        if (connection.isClosed()) {
             return false;
         }
         return true;
     }
+
 }
