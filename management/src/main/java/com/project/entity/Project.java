@@ -91,7 +91,7 @@ public class Project  implements Serializable {
         updateProgression();
     }
 
-    private void updateProgression() {
+    public void updateProgression() {
         if (tasks.isEmpty()) {
             progression = 0.0;
             return;
